@@ -3,45 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BedrockPlayz Hub</title>
+    <title>BedrockPlayz Hub - Ultra</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --primary: #3ecf8e; --bg: #121212; --card: #1e1e1e; --text: #e1e1e1; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; }
+        :root { --primary: #3ecf8e; --bg: #121212; --card: #1e1e1e; --text: #e1e1e1; --sidebar: #0a0a0a; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; }
         
         /* Sidebar */
-        nav { width: 250px; background: #0a0a0a; height: 100vh; position: fixed; padding: 20px; border-right: 1px solid #333; }
-        nav h2 { color: var(--primary); text-align: center; }
-        nav ul { list-style: none; padding: 0; }
-        nav li { padding: 15px; cursor: pointer; border-radius: 8px; transition: 0.3s; }
-        nav li:hover { background: #222; color: var(--primary); }
+        nav { width: 260px; background: var(--sidebar); height: 100vh; position: fixed; padding: 20px; border-right: 1px solid #333; z-index: 100; }
+        nav h2 { color: var(--primary); text-align: center; letter-spacing: 2px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        nav ul { list-style: none; padding: 0; margin-top: 30px; }
+        nav li { padding: 15px; cursor: pointer; border-radius: 8px; transition: 0.3s; margin-bottom: 10px; font-weight: bold; }
+        nav li:hover { background: #222; color: var(--primary); transform: translateX(5px); }
         
         /* Main Content */
-        main { margin-left: 280px; padding: 40px; width: 100%; }
-        .section { display: none; }
+        main { margin-left: 300px; padding: 40px; width: calc(100% - 300px); min-height: 100vh; }
+        .section { display: none; animation: fadeIn 0.5s; }
         .active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Search Bar */
+        .search-container { margin-bottom: 30px; }
+        #searchInput { width: 100%; padding: 15px; background: #1e1e1e; border: 2px solid #333; color: white; border-radius: 10px; font-size: 16px; outline: none; transition: 0.3s; }
+        #searchInput:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(62, 207, 142, 0.2); }
         
-        /* Card Display */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-        .card { background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid #333; }
-        .card img { width: 100%; height: 150px; object-fit: cover; }
-        .card-body { padding: 15px; }
+        /* Grid & Cards */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        .card { background: var(--card); border-radius: 15px; overflow: hidden; border: 1px solid #333; transition: 0.3s; position: relative; }
+        .card:hover { transform: translateY(-10px); border-color: var(--primary); }
+        .card img { width: 100%; height: 160px; object-fit: cover; }
+        .card-body { padding: 20px; }
+        .badge { background: #333; color: var(--primary); padding: 4px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; margin-bottom: 10px; display: inline-block; }
         
-        /* Form */
-        input, select, textarea { width: 100%; padding: 10px; margin: 10px 0; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 5px; }
-        button { background: var(--primary); color: black; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; }
+        /* Form & Buttons */
+        .form-group { background: #1e1e1e; padding: 25px; border-radius: 15px; border: 1px solid #333; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 8px; box-sizing: border-box; }
+        button { background: var(--primary); color: black; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
+        button:hover { background: #34b27b; filter: brightness(1.1); }
         
-        @media (max-width: 768px) {
-            nav { width: 100%; height: auto; position: relative; }
+        /* Mobile Responsive */
+        @media (max-width: 850px) {
+            nav { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 1px solid #333; }
             body { flex-direction: column; }
-            main { margin-left: 0; padding: 15px; }
+            main { margin-left: 0; padding: 20px; width: 100%; box-sizing: border-box; }
         }
     </style>
 </head>
 <body>
 
 <nav>
-    <h2>MCBE Hub</h2>
+    <h2>BEDROCK PLAYZ</h2>
     <ul>
         <li onclick="showSec('home')">🏠 Beranda</li>
         <li onclick="showSec('upload')">📤 Upload Project</li>
@@ -51,139 +62,200 @@
 
 <main>
     <div id="home" class="section active">
-        <h1>Terbaru</h1>
-        <div id="projectGrid" class="grid">Loading...</div>
+        <h1>Katalog Project</h1>
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="🔍 Cari addon, world, atau game Godot..." onkeyup="searchProject()">
+        </div>
+        <div id="projectGrid" class="grid">Memuat data dari awan... 🗿</div>
     </div>
 
     <div id="upload" class="section">
-        <h1>Upload Karya Kamu</h1>
-        <div id="authCheck">
-            <input type="text" id="pName" placeholder="Nama Addon/Game">
-            <textarea id="pDesc" placeholder="Deskripsi Singkat"></textarea>
-            <select id="pCat">
-                <option value="mcaddon">Minecraft Addon (.mcaddon)</option>
-                <option value="mcworld">Minecraft World (.mcworld)</option>
-                <option value="godot">Godot Game</option>
-            </select>
-            <input type="text" id="pVer" placeholder="Versi (Contoh: v1.0 / MC 1.21)">
-            <label>Thumbnail (JPG/PNG):</label>
-            <input type="file" id="pThumb" accept="image/*">
-            <label>File (.mcaddon / .zip):</label>
-            <input type="file" id="pFile">
-            <button onclick="handleUpload()">Gas Upload! 🚀</button>
-            <p id="upStatus"></p>
+        <h1>Tambah Karya Baru</h1>
+        <div id="uploadFormContainer" class="form-group">
+            <p id="guestMsg">Harap login dulu di menu Profil untuk upload! 🗿</p>
+            <div id="actualForm" style="display:none">
+                <input type="text" id="pName" placeholder="Nama Addon / Judul Game">
+                <textarea id="pDesc" rows="3" placeholder="Deskripsi singkat tentang karyamu..."></textarea>
+                <select id="pCat">
+                    <option value="mcaddon">Minecraft Addon (.mcaddon)</option>
+                    <option value="mcworld">Minecraft World (.mcworld)</option>
+                    <option value="mctemplate">Minecraft Template</option>
+                    <option value="godot">Godot Game (PC/Web)</option>
+                </select>
+                <input type="text" id="pVer" placeholder="Versi Project (Contoh: v1.0.2 / MC 1.21)">
+                
+                <label style="display:block; margin-top:10px;">🖼️ Foto Thumbnail (Wajib):</label>
+                <input type="file" id="pThumb" accept="image/*">
+                
+                <label style="display:block; margin-top:10px;">📦 File Game/Addon (Wajib):</label>
+                <input type="file" id="pFile">
+                
+                <button id="btnUpload" onclick="handleUpload()">Publish Sekarang! 🚀</button>
+                <p id="upStatus" style="text-align:center; color: var(--primary);"></p>
+            </div>
         </div>
     </div>
 
     <div id="profile" class="section">
-        <h1>Sesi Akun</h1>
-        <div id="loginForm">
-            <input type="email" id="email" placeholder="Email">
-            <input type="password" id="pass" placeholder="Password">
-            <button onclick="auth('up')">Daftar</button>
-            <button style="background:gray; margin-top:5px;" onclick="auth('in')">Login</button>
-        </div>
-        <div id="userInfo" style="display:none">
-            <p id="userMail"></p>
-            <button onclick="supabase.auth.signOut().then(()=>location.reload())">Logout</button>
+        <h1>Sesi Pengguna</h1>
+        <div class="form-group">
+            <div id="loginForm">
+                <input type="email" id="email" placeholder="Email">
+                <input type="password" id="pass" placeholder="Password">
+                <button onclick="auth('in')">Login</button>
+                <button style="background:#444; color:white; margin-top:10px;" onclick="auth('up')">Belum punya akun? Daftar</button>
+            </div>
+            <div id="userInfo" style="display:none; text-align:center;">
+                <h3 id="userMail"></h3>
+                <p>Status: Creator ✅</p>
+                <button style="background:#ff4444; color:white;" onclick="logout()">Keluar Akun</button>
+            </div>
         </div>
     </div>
 </main>
 
 <script>
-    // --- KONFIGURASI SUPABASE ---
-    const SB_URL = "GANTI_URL_DISINI";
+    // --- 1. KONFIGURASI SUPABASE (WAJIB GANTI!) ---
+    const SB_URL = "GANTI_URL_DISINI"; 
     const SB_KEY = "GANTI_KEY_DISINI";
     const supabase = supabase.createClient(SB_URL, SB_KEY);
 
-    // Navigasi
+    // --- 2. FUNGSI NAVIGASI ---
     function showSec(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         if(id === 'home') loadProjects();
     }
 
-    // Auth
+    // --- 3. SISTEM AUTH (LOGIN/DAFTAR) ---
     async function auth(type) {
         const email = document.getElementById('email').value;
         const password = document.getElementById('pass').value;
+        if(!email || !password) return alert("Isi email & pass!");
+
         const { data, error } = type === 'up' ? 
             await supabase.auth.signUp({email, password}) : 
             await supabase.auth.signInWithPassword({email, password});
         
-        if(error) alert(error.message);
+        if(error) alert("Error: " + error.message);
         else location.reload();
     }
 
-    // Cek Status Login
-    supabase.auth.getSession().then(({data}) => {
-        if(data.session) {
+    async function logout() {
+        await supabase.auth.signOut();
+        location.reload();
+    }
+
+    // Cek Sesi Saat Ini
+    async function checkUser() {
+        const { data: { session } } = await supabase.auth.getSession();
+        if(session) {
             document.getElementById('loginForm').style.display = 'none';
             document.getElementById('userInfo').style.display = 'block';
-            document.getElementById('userMail').innerText = "Halo, " + data.session.user.email;
+            document.getElementById('userMail').innerText = session.user.email;
+            document.getElementById('actualForm').style.display = 'block';
+            document.getElementById('guestMsg').style.display = 'none';
         }
-    });
+    }
 
-    // Upload Logic
+    // --- 4. SISTEM SEARCH ---
+    function searchProject() {
+        const input = document.getElementById('searchInput').value.toLowerCase();
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            const title = card.querySelector('h3').innerText.toLowerCase();
+            const cat = card.querySelector('.badge').innerText.toLowerCase();
+            if (title.includes(input) || cat.includes(input)) {
+                card.style.display = "block";
+            } else {
+                card.style.display = "none";
+            }
+        });
+    }
+
+    // --- 5. LOGIKA UPLOAD ---
     async function handleUpload() {
-        const { data: { session } } = await supabase.auth.getSession();
-        if(!session) return alert("Login dulu Bosku!");
-
         const name = document.getElementById('pName').value;
         const file = document.getElementById('pFile').files[0];
         const thumb = document.getElementById('pThumb').files[0];
         const status = document.getElementById('upStatus');
+        const btn = document.getElementById('btnUpload');
 
-        if(!file || !thumb || !name) return alert("Data harus lengkap!");
+        if(!file || !thumb || !name) return alert("Nama, File, dan Foto wajib ada!");
 
-        status.innerText = "Sabar, lagi ngirim file...";
+        btn.disabled = true;
+        status.innerText = "⏳ Sedang memproses... Jangan tutup browser.";
 
-        // 1. Upload Thumb
-        const tPath = 'thumbs/' + Date.now() + "_" + thumb.name;
-        await supabase.storage.from('addons').upload(tPath, thumb);
-        const { data: tURL } = supabase.storage.from('addons').getPublicUrl(tPath);
+        try {
+            // A. Upload Thumbnail
+            const tPath = 'thumbs/' + Date.now() + "_" + thumb.name;
+            await supabase.storage.from('addons').upload(tPath, thumb);
+            const { data: tURL } = supabase.storage.from('addons').getPublicUrl(tPath);
 
-        // 2. Upload File
-        const fPath = 'files/' + Date.now() + "_" + file.name;
-        await supabase.storage.from('addons').upload(fPath, file);
-        const { data: fURL } = supabase.storage.from('addons').getPublicUrl(fPath);
+            // B. Upload File Utama
+            const fPath = 'files/' + Date.now() + "_" + file.name;
+            await supabase.storage.from('addons').upload(fPath, file);
+            const { data: fURL } = supabase.storage.from('addons').getPublicUrl(fPath);
 
-        // 3. Simpan Data ke Tabel 'files'
-        await supabase.from('files').insert([{
-            name: name,
-            url: fURL.publicUrl,
-            thumb: tURL.publicUrl,
-            category: document.getElementById('pCat').value,
-            version: document.getElementById('pVer').value,
-            desc: document.getElementById('pDesc').value
-        }]);
+            // C. Simpan ke Database
+            const { error } = await supabase.from('files').insert([{
+                name: name,
+                url: fURL.publicUrl,
+                thumb: tURL.publicUrl,
+                category: document.getElementById('pCat').value,
+                version: document.getElementById('pVer').value,
+                desc: document.getElementById('pDesc').value
+            }]);
 
-        status.innerText = "BERHASIL! Cek di Beranda.";
-        setTimeout(() => showSec('home'), 2000);
-    }
+            if(error) throw error;
 
-    // Load Data ke Beranda
-    async function loadProjects() {
-        const { data } = await supabase.from('files').select('*').order('created_at', {ascending: false});
-        const grid = document.getElementById('projectGrid');
-        
-        if(data) {
-            grid.innerHTML = data.map(p => `
-                <div class="card">
-                    <img src="${p.thumb || 'https://via.placeholder.com/150'}">
-                    <div class="card-body">
-                        <h3>${p.name}</h3>
-                        <p style="font-size:12px; color:#aaa">${p.desc || ''}</p>
-                        <small>${p.category} | ${p.version}</small>
-                        <button onclick="window.open('${p.url}')" style="margin-top:10px">Download</button>
-                    </div>
-                </div>
-            `).join('');
+            status.innerText = "✅ Berhasil Diupload! Mengalihkan...";
+            setTimeout(() => location.reload(), 2000);
+
+        } catch (err) {
+            alert("Gagal: " + err.message);
+            btn.disabled = false;
+            status.innerText = "";
         }
     }
 
+    // --- 6. LOAD DATA KE BERANDA ---
+    async function loadProjects() {
+        const grid = document.getElementById('projectGrid');
+        const { data, error } = await supabase
+            .from('files')
+            .select('*')
+            .order('id', {ascending: false});
+        
+        if(error) {
+            grid.innerHTML = "Gagal memuat data. Periksa koneksi atau tabel Supabase kamu.";
+            return;
+        }
+
+        if(data.length === 0) {
+            grid.innerHTML = "Belum ada project yang diupload. Jadi yang pertama! 🗿";
+            return;
+        }
+
+        grid.innerHTML = data.map(p => `
+            <div class="card">
+                <img src="${p.thumb || 'https://via.placeholder.com/300x160?text=No+Image'}">
+                <div class="card-body">
+                    <span class="badge">${p.category.toUpperCase()}</span>
+                    <h3>${p.name}</h3>
+                    <p style="font-size:13px; color:#bbb; height:40px; overflow:hidden;">${p.desc || 'Tidak ada deskripsi.'}</p>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
+                        <small style="color:var(--primary)">Ver: ${p.version || '?'}</small>
+                        <button onclick="window.open('${p.url}')" style="width:auto; padding:8px 15px;">Download</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Jalankan saat startup
+    checkUser();
     loadProjects();
 </script>
 </body>
-  </html>
-              
+</html>
