@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BedrockPlayz Hub</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --primary: #3ecf8e; --bg: #121212; --card: #1e1e1e; --text: #e1e1e1; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; }
+        
+        /* Sidebar */
+        nav { width: 250px; background: #0a0a0a; height: 100vh; position: fixed; padding: 20px; border-right: 1px solid #333; }
+        nav h2 { color: var(--primary); text-align: center; }
+        nav ul { list-style: none; padding: 0; }
+        nav li { padding: 15px; cursor: pointer; border-radius: 8px; transition: 0.3s; }
+        nav li:hover { background: #222; color: var(--primary); }
+        
+        /* Main Content */
+        main { margin-left: 280px; padding: 40px; width: 100%; }
+        .section { display: none; }
+        .active { display: block; }
+        
+        /* Card Display */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .card { background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid #333; }
+        .card img { width: 100%; height: 150px; object-fit: cover; }
+        .card-body { padding: 15px; }
+        
+        /* Form */
+        input, select, textarea { width: 100%; padding: 10px; margin: 10px 0; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 5px; }
+        button { background: var(--primary); color: black; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; }
+        
+        @media (max-width: 768px) {
+            nav { width: 100%; height: auto; position: relative; }
+            body { flex-direction: column; }
+            main { margin-left: 0; padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <h2>MCBE Hub</h2>
+    <ul>
+        <li onclick="showSec('home')">🏠 Beranda</li>
+        <li onclick="showSec('upload')">📤 Upload Project</li>
+        <li onclick="showSec('profile')">👤 Akun / Login</li>
+    </ul>
+</nav>
+
+<main>
+    <div id="home" class="section active">
+        <h1>Terbaru</h1>
+        <div id="projectGrid" class="grid">Loading...</div>
+    </div>
+
+    <div id="upload" class="section">
+        <h1>Upload Karya Kamu</h1>
+        <div id="authCheck">
+            <input type="text" id="pName" placeholder="Nama Addon/Game">
+            <textarea id="pDesc" placeholder="Deskripsi Singkat"></textarea>
+            <select id="pCat">
+                <option value="mcaddon">Minecraft Addon (.mcaddon)</option>
+                <option value="mcworld">Minecraft World (.mcworld)</option>
+                <option value="godot">Godot Game</option>
+            </select>
+            <input type="text" id="pVer" placeholder="Versi (Contoh: v1.0 / MC 1.21)">
+            <label>Thumbnail (JPG/PNG):</label>
+            <input type="file" id="pThumb" accept="image/*">
+            <label>File (.mcaddon / .zip):</label>
+            <input type="file" id="pFile">
+            <button onclick="handleUpload()">Gas Upload! 🚀</button>
+            <p id="upStatus"></p>
+        </div>
+    </div>
+
+    <div id="profile" class="section">
+        <h1>Sesi Akun</h1>
+        <div id="loginForm">
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="pass" placeholder="Password">
+            <button onclick="auth('up')">Daftar</button>
+            <button style="background:gray; margin-top:5px;" onclick="auth('in')">Login</button>
+        </div>
+        <div id="userInfo" style="display:none">
+            <p id="userMail"></p>
+            <button onclick="supabase.auth.signOut().then(()=>location.reload())">Logout</button>
+        </div>
+    </div>
+</main>
+
+<script>
+    // --- KONFIGURASI SUPABASE ---
+    const SB_URL = "GANTI_URL_DISINI";
+    const SB_KEY = "GANTI_KEY_DISINI";
+    const supabase = supabase.createClient(SB_URL, SB_KEY);
+
+    // Navigasi
+    function showSec(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(id === 'home') loadProjects();
+    }
+
+    // Auth
+    async function auth(type) {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('pass').value;
+        const { data, error } = type === 'up' ? 
+            await supabase.auth.signUp({email, password}) : 
+            await supabase.auth.signInWithPassword({email, password});
+        
+        if(error) alert(error.message);
+        else location.reload();
+    }
+
+    // Cek Status Login
+    supabase.auth.getSession().then(({data}) => {
+        if(data.session) {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('userInfo').style.display = 'block';
+            document.getElementById('userMail').innerText = "Halo, " + data.session.user.email;
+        }
+    });
+
+    // Upload Logic
+    async function handleUpload() {
+        const { data: { session } } = await supabase.auth.getSession();
+        if(!session) return alert("Login dulu Bosku!");
+
+        const name = document.getElementById('pName').value;
+        const file = document.getElementById('pFile').files[0];
+        const thumb = document.getElementById('pThumb').files[0];
+        const status = document.getElementById('upStatus');
+
+        if(!file || !thumb || !name) return alert("Data harus lengkap!");
+
+        status.innerText = "Sabar, lagi ngirim file...";
+
+        // 1. Upload Thumb
+        const tPath = 'thumbs/' + Date.now() + "_" + thumb.name;
+        await supabase.storage.from('addons').upload(tPath, thumb);
+        const { data: tURL } = supabase.storage.from('addons').getPublicUrl(tPath);
+
+        // 2. Upload File
+        const fPath = 'files/' + Date.now() + "_" + file.name;
+        await supabase.storage.from('addons').upload(fPath, file);
+        const { data: fURL } = supabase.storage.from('addons').getPublicUrl(fPath);
+
+        // 3. Simpan Data ke Tabel 'files'
+        await supabase.from('files').insert([{
+            name: name,
+            url: fURL.publicUrl,
+            thumb: tURL.publicUrl,
+            category: document.getElementById('pCat').value,
+            version: document.getElementById('pVer').value,
+            desc: document.getElementById('pDesc').value
+        }]);
+
+        status.innerText = "BERHASIL! Cek di Beranda.";
+        setTimeout(() => showSec('home'), 2000);
+    }
+
+    // Load Data ke Beranda
+    async function loadProjects() {
+        const { data } = await supabase.from('files').select('*').order('created_at', {ascending: false});
+        const grid = document.getElementById('projectGrid');
+        
+        if(data) {
+            grid.innerHTML = data.map(p => `
+                <div class="card">
+                    <img src="${p.thumb || 'https://via.placeholder.com/150'}">
+                    <div class="card-body">
+                        <h3>${p.name}</h3>
+                        <p style="font-size:12px; color:#aaa">${p.desc || ''}</p>
+                        <small>${p.category} | ${p.version}</small>
+                        <button onclick="window.open('${p.url}')" style="margin-top:10px">Download</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
+
+    loadProjects();
+</script>
+</body>
+  </html>
+              
