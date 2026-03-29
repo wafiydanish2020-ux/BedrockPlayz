@@ -3,152 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BedrockPlayz Hub - Ultra</title>
+    <title>BedrockPlayz Hub - Reborn</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #3ecf8e; --bg: #121212; --card: #1e1e1e; --text: #e1e1e1; --sidebar: #0a0a0a; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; }
+        :root { --primary: #3ecf8e; --bg: #0d0d0d; --card: #1a1a1a; --text: #ffffff; --acc: #252525; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 80px; overflow-x: hidden; }
         
-        /* Sidebar */
-        nav { width: 260px; background: var(--sidebar); height: 100vh; position: fixed; padding: 20px; border-right: 1px solid #333; z-index: 100; }
-        nav h2 { color: var(--primary); text-align: center; letter-spacing: 2px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-        nav ul { list-style: none; padding: 0; margin-top: 30px; }
-        nav li { padding: 15px; cursor: pointer; border-radius: 8px; transition: 0.3s; margin-bottom: 10px; font-weight: bold; }
-        nav li:hover { background: #222; color: var(--primary); transform: translateX(5px); }
-        
-        /* Main Content */
-        main { margin-left: 300px; padding: 40px; width: calc(100% - 300px); min-height: 100vh; }
-        .section { display: none; animation: fadeIn 0.5s; }
-        .active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        header { padding: 25px 20px; text-align: center; background: linear-gradient(to bottom, #1a1a1a, transparent); }
+        header h1 { color: var(--primary); font-size: 24px; margin: 0; letter-spacing: 2px; text-transform: uppercase; font-weight: 800; }
 
-        /* Search Bar */
-        .search-container { margin-bottom: 30px; }
-        #searchInput { width: 100%; padding: 15px; background: #1e1e1e; border: 2px solid #333; color: white; border-radius: 10px; font-size: 16px; outline: none; transition: 0.3s; }
-        #searchInput:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(62, 207, 142, 0.2); }
-        
-        /* Grid & Cards */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
-        .card { background: var(--card); border-radius: 15px; overflow: hidden; border: 1px solid #333; transition: 0.3s; position: relative; }
-        .card:hover { transform: translateY(-10px); border-color: var(--primary); }
-        .card img { width: 100%; height: 160px; object-fit: cover; }
-        .card-body { padding: 20px; }
-        .badge { background: #333; color: var(--primary); padding: 4px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; margin-bottom: 10px; display: inline-block; }
-        
-        /* Form & Buttons */
-        .form-group { background: #1e1e1e; padding: 25px; border-radius: 15px; border: 1px solid #333; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 8px; box-sizing: border-box; }
-        button { background: var(--primary); color: black; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; }
-        button:hover { background: #34b27b; filter: brightness(1.1); }
-        
-        /* Mobile Responsive */
-        @media (max-width: 850px) {
-            nav { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 1px solid #333; }
-            body { flex-direction: column; }
-            main { margin-left: 0; padding: 20px; width: 100%; box-sizing: border-box; }
+        .search-box { padding: 0 20px; margin-bottom: 25px; }
+        #searchInput { 
+            width: 100%; padding: 14px 20px; background: var(--acc); border: 1px solid #333; 
+            color: white; border-radius: 12px; font-size: 15px; outline: none; box-sizing: border-box; transition: 0.3s;
         }
+        #searchInput:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(62, 207, 142, 0.2); }
+
+        main { padding: 0 20px; min-height: 80vh; }
+        .section { display: none; animation: slideUp 0.4s ease; }
+        .active { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
+        .card { background: var(--card); border-radius: 16px; overflow: hidden; border: 1px solid #222; transition: 0.3s; }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .card img { width: 100%; aspect-ratio: 16/10; object-fit: cover; background: #222; }
+        .card-info { padding: 12px; }
+        .card-info h3 { font-size: 14px; margin: 5px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-tag { font-size: 10px; color: var(--primary); font-weight: bold; background: rgba(62, 207, 142, 0.1); padding: 2px 8px; border-radius: 4px; display: inline-block; margin-bottom: 5px; }
+        
+        .bottom-nav { 
+            position: fixed; bottom: 0; left: 0; right: 0; height: 75px; 
+            background: rgba(15, 15, 15, 0.98); backdrop-filter: blur(15px);
+            display: flex; justify-content: space-around; align-items: center;
+            border-top: 1px solid #222; z-index: 1000;
+        }
+        .nav-item { color: #666; text-align: center; font-size: 11px; cursor: pointer; transition: 0.3s; flex: 1; }
+        .nav-item i { font-size: 20px; display: block; margin-bottom: 5px; }
+        .nav-item.active-nav { color: var(--primary); font-weight: bold; }
+
+        .form-ui { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid #222; margin-top: 10px; }
+        .form-ui h2 { margin-top: 0; font-size: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        input, select, textarea { 
+            width: 100%; padding: 13px; margin: 10px 0; background: #222; 
+            border: 1px solid #333; color: white; border-radius: 12px; box-sizing: border-box; font-size: 14px;
+        }
+        .btn-main { 
+            background: var(--primary); color: #000; border: none; padding: 15px; 
+            border-radius: 12px; font-weight: bold; width: 100%; margin-top: 15px; cursor: pointer; transition: 0.3s;
+        }
+        .btn-main:active { transform: scale(0.98); }
+        label { font-size: 13px; color: #aaa; margin-top: 10px; display: block; padding-left: 5px; }
     </style>
 </head>
 <body>
 
-<nav>
-    <h2>BEDROCK PLAYZ</h2>
-    <ul>
-        <li onclick="showSec('home')">🏠 Beranda</li>
-        <li onclick="showSec('upload')">📤 Upload Project</li>
-        <li onclick="showSec('profile')">👤 Akun / Login</li>
-    </ul>
-</nav>
+<header>
+    <h1>BEDROCKPLAYZ</h1>
+</header>
 
 <main>
     <div id="home" class="section active">
-        <h1>Katalog Project</h1>
-        <div class="search-container">
-            <input type="text" id="searchInput" placeholder="🔍 Cari addon, world, atau game Godot..." onkeyup="searchProject()">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Cari addon, world, atau game..." onkeyup="searchProject()">
         </div>
-        <div id="projectGrid" class="grid">Memuat data dari awan... 🗿</div>
+        <div id="projectGrid" class="grid"></div>
     </div>
 
     <div id="upload" class="section">
-        <h1>Tambah Karya Baru</h1>
-        <div id="uploadFormContainer" class="form-group">
-            <p id="guestMsg">Harap login dulu di menu Profil untuk upload! 🗿</p>
+        <div class="form-ui">
+            <h2>Upload Project</h2>
+            <div id="guestMsg" style="text-align: center; padding: 20px;">
+                <p>Harap login dulu di menu Akun! 🗿</p>
+            </div>
             <div id="actualForm" style="display:none">
-                <input type="text" id="pName" placeholder="Nama Addon / Judul Game">
-                <textarea id="pDesc" rows="3" placeholder="Deskripsi singkat tentang karyamu..."></textarea>
+                <input type="text" id="pName" placeholder="Nama Project">
                 <select id="pCat">
-                    <option value="mcaddon">Minecraft Addon (.mcaddon)</option>
-                    <option value="mcworld">Minecraft World (.mcworld)</option>
-                    <option value="mctemplate">Minecraft Template</option>
-                    <option value="godot">Godot Game (PC/Web)</option>
+                    <option value="addon">Minecraft Addon</option>
+                    <option value="world">Minecraft World</option>
+                    <option value="godot">Godot Game</option>
                 </select>
-                <input type="text" id="pVer" placeholder="Versi Project (Contoh: v1.0.2 / MC 1.21)">
+                <input type="text" id="pVer" placeholder="Versi (Contoh: v1.0 / 1.21)">
+                <textarea id="pDesc" rows="3" placeholder="Deskripsi singkat..."></textarea>
                 
-                <label style="display:block; margin-top:10px;">🖼️ Foto Thumbnail (Wajib):</label>
+                <label><i class="fa-solid fa-image"></i> Foto Thumbnail:</label>
                 <input type="file" id="pThumb" accept="image/*">
                 
-                <label style="display:block; margin-top:10px;">📦 File Game/Addon (Wajib):</label>
+                <label><i class="fa-solid fa-file-zipper"></i> File Project:</label>
                 <input type="file" id="pFile">
                 
-                <button id="btnUpload" onclick="handleUpload()">Publish Sekarang! 🚀</button>
-                <p id="upStatus" style="text-align:center; color: var(--primary);"></p>
+                <button class="btn-main" id="btnUpload" onclick="handleUpload()">Publish Sekarang! 🚀</button>
+                <p id="upStatus" style="text-align:center; color: var(--primary); font-size: 13px; margin-top: 10px;"></p>
             </div>
         </div>
     </div>
 
     <div id="profile" class="section">
-        <h1>Sesi Pengguna</h1>
-        <div class="form-group">
+        <div class="form-ui" style="text-align: center;">
             <div id="loginForm">
+                <h2>Akses Kreator</h2>
                 <input type="email" id="email" placeholder="Email">
                 <input type="password" id="pass" placeholder="Password">
-                <button onclick="auth('in')">Login</button>
-                <button style="background:#444; color:white; margin-top:10px;" onclick="auth('up')">Belum punya akun? Daftar</button>
+                <button class="btn-main" onclick="auth('in')">Login</button>
+                <button style="background:none; border:none; color:var(--primary); margin-top:15px; cursor:pointer;" onclick="auth('up')">Belum punya akun? Daftar</button>
             </div>
-            <div id="userInfo" style="display:none; text-align:center;">
-                <h3 id="userMail"></h3>
-                <p>Status: Creator ✅</p>
-                <button style="background:#ff4444; color:white;" onclick="logout()">Keluar Akun</button>
+            <div id="userInfo" style="display:none">
+                <div style="font-size: 60px; color: var(--primary); margin-bottom: 10px;"><i class="fa-solid fa-circle-user"></i></div>
+                <h3 id="userMail" style="margin-bottom: 5px;"></h3>
+                <p style="color: #888; margin-bottom: 20px;">Status: Creator ✅</p>
+                <button class="btn-main" style="background: #ff4444; color: white;" onclick="logout()">Logout / Keluar</button>
             </div>
         </div>
     </div>
 </main>
 
+<div class="bottom-nav">
+    <div class="nav-item active-nav" onclick="changeTab(this, 'home')">
+        <i class="fa-solid fa-house"></i>Beranda
+    </div>
+    <div class="nav-item" onclick="changeTab(this, 'upload')">
+        <i class="fa-solid fa-plus-circle"></i>Upload
+    </div>
+    <div class="nav-item" onclick="changeTab(this, 'profile')">
+        <i class="fa-solid fa-user"></i>Akun
+    </div>
+</div>
+
 <script>
-    // --- 1. KONFIGURASI SUPABASE (WAJIB GANTI!) ---
+    // --- 1. CONFIG (Kunci Kamu Tetap Aman Di Sini) ---
     const SB_URL = "https://fokzvzoalehspmosrhud.supabase.co"; 
     const SB_KEY = "sb_publishable_Mbe-Np5ntpTVGfSDzqsLxQ_fkz5S5Fn";
-    const supabase = supabase.createClient(SB_URL, SB_KEY);
+    const _supabase = supabase.createClient(SB_URL, SB_KEY);
 
-    // --- 2. FUNGSI NAVIGASI ---
+    // --- 2. NAVIGASI ---
+    function changeTab(el, id) {
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
+        el.classList.add('active-nav');
+        showSec(id);
+    }
+
     function showSec(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         if(id === 'home') loadProjects();
     }
 
-    // --- 3. SISTEM AUTH (LOGIN/DAFTAR) ---
+    // --- 3. AUTH ---
     async function auth(type) {
         const email = document.getElementById('email').value;
         const password = document.getElementById('pass').value;
         if(!email || !password) return alert("Isi email & pass!");
 
         const { data, error } = type === 'up' ? 
-            await supabase.auth.signUp({email, password}) : 
-            await supabase.auth.signInWithPassword({email, password});
+            await _supabase.auth.signUp({email, password}) : 
+            await _supabase.auth.signInWithPassword({email, password});
         
         if(error) alert("Error: " + error.message);
         else location.reload();
     }
 
     async function logout() {
-        await supabase.auth.signOut();
+        await _supabase.auth.signOut();
         location.reload();
     }
 
-    // Cek Sesi Saat Ini
     async function checkUser() {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await _supabase.auth.getSession();
         if(session) {
             document.getElementById('loginForm').style.display = 'none';
             document.getElementById('userInfo').style.display = 'block';
@@ -158,13 +179,13 @@
         }
     }
 
-    // --- 4. SISTEM SEARCH ---
+    // --- 4. SEARCH ---
     function searchProject() {
         const input = document.getElementById('searchInput').value.toLowerCase();
         const cards = document.querySelectorAll('.card');
         cards.forEach(card => {
             const title = card.querySelector('h3').innerText.toLowerCase();
-            const cat = card.querySelector('.badge').innerText.toLowerCase();
+            const cat = card.querySelector('.card-tag').innerText.toLowerCase();
             if (title.includes(input) || cat.includes(input)) {
                 card.style.display = "block";
             } else {
@@ -173,7 +194,7 @@
         });
     }
 
-    // --- 5. LOGIKA UPLOAD ---
+    // --- 5. UPLOAD ---
     async function handleUpload() {
         const name = document.getElementById('pName').value;
         const file = document.getElementById('pFile').files[0];
@@ -184,21 +205,18 @@
         if(!file || !thumb || !name) return alert("Nama, File, dan Foto wajib ada!");
 
         btn.disabled = true;
-        status.innerText = "⏳ Sedang memproses... Jangan tutup browser.";
+        status.innerText = "⏳ Sedang memproses... Tunggu ya.";
 
         try {
-            // A. Upload Thumbnail
-            const tPath = 'thumbs/' + Date.now() + "_" + thumb.name;
-            await supabase.storage.from('addons').upload(tPath, thumb);
-            const { data: tURL } = supabase.storage.from('addons').getPublicUrl(tPath);
+            const tPath = 'thumbs/' + Date.now() + "_" + thumb.name.replace(/\s/g, '_');
+            await _supabase.storage.from('addons').upload(tPath, thumb);
+            const { data: tURL } = _supabase.storage.from('addons').getPublicUrl(tPath);
 
-            // B. Upload File Utama
-            const fPath = 'files/' + Date.now() + "_" + file.name;
-            await supabase.storage.from('addons').upload(fPath, file);
-            const { data: fURL } = supabase.storage.from('addons').getPublicUrl(fPath);
+            const fPath = 'files/' + Date.now() + "_" + file.name.replace(/\s/g, '_');
+            await _supabase.storage.from('addons').upload(fPath, file);
+            const { data: fURL } = _supabase.storage.from('addons').getPublicUrl(fPath);
 
-            // C. Simpan ke Database
-            const { error } = await supabase.from('files').insert([{
+            const { error } = await _supabase.from('files').insert([{
                 name: name,
                 url: fURL.publicUrl,
                 thumb: tURL.publicUrl,
@@ -208,10 +226,8 @@
             }]);
 
             if(error) throw error;
-
-            status.innerText = "✅ Berhasil Diupload! Mengalihkan...";
-            setTimeout(() => location.reload(), 2000);
-
+            status.innerText = "✅ Berhasil Diupload!";
+            setTimeout(() => location.reload(), 1500);
         } catch (err) {
             alert("Gagal: " + err.message);
             btn.disabled = false;
@@ -219,41 +235,38 @@
         }
     }
 
-    // --- 6. LOAD DATA KE BERANDA ---
+    // --- 6. LOAD DATA ---
     async function loadProjects() {
         const grid = document.getElementById('projectGrid');
-        const { data, error } = await supabase
-            .from('files')
-            .select('*')
-            .order('id', {ascending: false});
+        grid.innerHTML = "<p style='text-align:center;'>Memanggil data... 🗿</p>";
         
-        if(error) {
-            grid.innerHTML = "Gagal memuat data. Periksa koneksi atau tabel Supabase kamu.";
+        const { data, error } = await _supabase.from('files').select('*').order('id', {ascending: false});
+        
+        if(error || !data) {
+            grid.innerHTML = "<p>Gagal memuat. Cek Database!</p>";
             return;
         }
 
         if(data.length === 0) {
-            grid.innerHTML = "Belum ada project yang diupload. Jadi yang pertama! 🗿";
+            grid.innerHTML = "<p style='text-align:center; grid-column: 1/-1;'>Belum ada karya. Upload sekarang! 🗿</p>";
             return;
         }
 
         grid.innerHTML = data.map(p => `
             <div class="card">
-                <img src="${p.thumb || 'https://via.placeholder.com/300x160?text=No+Image'}">
-                <div class="card-body">
-                    <span class="badge">${p.category.toUpperCase()}</span>
+                <img src="${p.thumb}" onerror="this.src='https://via.placeholder.com/300x160?text=No+Thumbnail'">
+                <div class="card-info">
+                    <span class="card-tag">${p.category.toUpperCase()}</span>
                     <h3>${p.name}</h3>
-                    <p style="font-size:13px; color:#bbb; height:40px; overflow:hidden;">${p.desc || 'Tidak ada deskripsi.'}</p>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
-                        <small style="color:var(--primary)">Ver: ${p.version || '?'}</small>
-                        <button onclick="window.open('${p.url}')" style="width:auto; padding:8px 15px;">Download</button>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                        <small style="color:#888;">${p.version}</small>
+                        <button onclick="window.open('${p.url}')" style="background:var(--primary); border:none; border-radius:6px; padding:5px 10px; font-weight:bold; cursor:pointer; font-size:12px;">Get</button>
                     </div>
                 </div>
             </div>
         `).join('');
     }
 
-    // Jalankan saat startup
     checkUser();
     loadProjects();
 </script>
